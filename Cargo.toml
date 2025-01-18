@@ -1,6 +1,67 @@
-[package]
-name = "nebula-workflow"
+[workspace]
+members = ["crates/workflow"]
+resolver = "2"
+
+[workspace.package]
 version = "0.1.0"
 edition = "2021"
+keywords = ["workflow", "integrations", "no-code", "low-code", "automation"]
 
-[dependencies]
+[workspace.lints.clippy]
+doc_markdown = "warn"
+manual_let_else = "warn"
+match_same_arms = "warn"
+redundant_closure_for_method_calls = "warn"
+redundant_else = "warn"
+semicolon_if_nothing_returned = "warn"
+type_complexity = "allow"
+undocumented_unsafe_blocks = "warn"
+unwrap_or_default = "warn"
+needless_lifetimes = "allow"
+too_many_arguments = "allow"
+ptr_as_ptr = "warn"
+ptr_cast_constness = "warn"
+ref_as_ptr = "warn"
+too_long_first_doc_paragraph = "allow"
+std_instead_of_core = "warn"
+std_instead_of_alloc = "warn"
+alloc_instead_of_core = "warn"
+allow_attributes = "warn"
+allow_attributes_without_reason = "warn"
+
+[workspace.lints.rust]
+missing_docs = "warn"
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(docsrs_dep)'] }
+unsafe_code = "deny"
+unsafe_op_in_unsafe_fn = "warn"
+unused_qualifications = "warn"
+
+[workspace.dependencies]
+tokio = {version = "1.43.0", default-features = false }
+futures = {version = "0.3.16", default-features = false }
+chrono = {version = "0.4.39", default-features = false }
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = { version = "1.0.135", default-features = false }
+tracing = { version = "0.1.41", default-features = false }
+tracing-subscriber = { version = "0.3.19", default-features = false }
+thiserror = { version = "2.0.11", default-features = false }
+anyhow = { version = "1.0.95", default-features = false }
+async-trait = {version = "0.1.85", default-features = false }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+debug = false
+strip = true
+overflow-checks = false
+
+[profile.dev]
+opt-level = 1
+debug = true
+overflow-checks = true
+lto = false
+codegen-units = 16
+panic = "unwind"
+incremental = true
