@@ -1,22 +1,124 @@
-name: Docs Publish
+name: Deploy Docs
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write  # Нужно для записи в ветку
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Build docs
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+      
+      - name: Install cargo-workspaces
+        run: cargo install cargo-workspaces
+      
+      - name: Build documentation
         run: cargo doc --all --no-deps --document-private-items
+      
+      - name: Create index.html for workspace
+        run: |
+          # Получаем список крейтов
+          CRATES=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[].name' | tr '-' '_')
+          
+          # Создаём index.html
+          cat > target/doc/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Nebula Workspace Documentation</title>
+              <style>
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                      max-width: 800px;
+                      margin: 0 auto;
+                      padding: 40px 20px;
+                      line-height: 1.6;
+                  }
+                  h1 { margin-bottom: 30px; }
+                  .crates-list {
+                      list-style: none;
+                      padding: 0;
+                  }
+                  .crates-list li {
+                      margin: 15px 0;
+                      padding: 15px;
+                      background: #f6f8fa;
+                      border-radius: 6px;
+                      transition: background-color 0.2s;
+                  }
+                  .crates-list li:hover {
+                      background: #ebeef1;
+                  }
+                  .crates-list a {
+                      color: #0366d6;
+                      text-decoration: none;
+                      font-size: 18px;
+                      font-weight: 500;
+                  }
+                  .crates-list a:hover {
+                      text-decoration: underline;
+                  }
+                  @media (prefers-color-scheme: dark) {
+                      body {
+                          background: #0d1117;
+                          color: #c9d1d9;
+                      }
+                      .crates-list li {
+                          background: #161b22;
+                      }
+                      .crates-list li:hover {
+                          background: #1c2128;
+                      }
+                      .crates-list a {
+                          color: #58a6ff;
+                      }
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>📚 Nebula Workspace Documentation</h1>
+              <p>Select a crate to view its documentation:</p>
+              <ul class="crates-list">
+          EOF
+          
+          # Добавляем ссылки на крейты
+          for crate in $CRATES; do
+              echo "                  <li><a href=\"./${crate}/index.html\">📦 ${crate}</a></li>" >> target/doc/index.html
+          done
+          
+          echo "              </ul>
+          </body>
+          </html>" >> target/doc/index.html
+      
+      # Удаляем .lock файл
+      - name: Clean up
+        run: rm -f target/doc/.lock
+      
+      # Деплоим используя peaceiris/actions-gh-pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/doc
           publish_branch: gh-pages
-          force_orphan: true 
+          force_orphan: true
