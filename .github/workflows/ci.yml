@@ -12,10 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
+        uses: actions/setup-rust@v1
         with:
-          toolchain: stable
-          override: true
+          rust-version: stable
           components: rustfmt, clippy
       - name: Check formatting
         run: cargo fmt --all -- --check
