@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["CheckpointManager","WorkflowCheckpoint"],"type":["CheckpointId","NodeId","WorkflowId"]};

@@ -1,0 +1,1 @@
+searchState.loadedDescShard("nebula_core", 0, "Example public function for documentation")

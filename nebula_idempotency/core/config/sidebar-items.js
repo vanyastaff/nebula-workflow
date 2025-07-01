@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ConflictBehavior","IdempotencyKeyStrategy","IdempotencyStorageBackend"],"struct":["IdempotencyConfig","ResultCachingConfig"]};
