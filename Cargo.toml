@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "crates/nebula-core",
-    "crates/nebula-engine"
+    "crates/nebula-engine",
+    "crates/nebula-idempotency"
 ]
 resolver = "3"
 
